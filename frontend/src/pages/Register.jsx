@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { FaUser } from 'react-icons/fa'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import { FaUser } from 'react-icons/fa'
 import { useSelector, useDispatch } from 'react-redux'
 import { register } from '../features/auth/authSlice'
+import Spinner from '../components/Spinner'
 
-const Register = () => {
-  const [formData, setFormaData] = useState({
+function Register() {
+  const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
@@ -15,17 +17,22 @@ const Register = () => {
   const { name, email, password, password2 } = formData
 
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
-  const { user, isError, isSuccess, isLoading, message } = useSelector(
-    (state) => state.auth
-  )
+  const { isLoading } = useSelector((state) => state.auth)
 
   const onChange = (e) => {
-    setFormaData((prev) => ({
-      ...prev,
+    setFormData((prevState) => ({
+      ...prevState,
       [e.target.name]: e.target.value,
     }))
   }
+
+  // NOTE: no need for useEffect here as we can catch the
+  // AsyncThunkAction rejection in our onSubmit or redirect them on the
+  // resolution
+  // Side effects should go in event handlers where possible
+  // source: - https://beta.reactjs.org/learn/keeping-components-pure#where-you-can-cause-side-effects
 
   const onSubmit = (e) => {
     e.preventDefault()
@@ -40,7 +47,20 @@ const Register = () => {
       }
 
       dispatch(register(userData))
+        .unwrap()
+        .then((user) => {
+          // NOTE: by unwrapping the AsyncThunkAction we can navigate the user after
+          // getting a good response from our API or catch the AsyncThunkAction
+          // rejection to show an error message
+          toast.success(`Registered new user - ${user.name}`)
+          navigate('/')
+        })
+        .catch(toast.error)
     }
+  }
+
+  if (isLoading) {
+    return <Spinner />
   }
 
   return (
@@ -62,7 +82,7 @@ const Register = () => {
               name='name'
               value={name}
               onChange={onChange}
-              placeholder='Enter your name...'
+              placeholder='Enter your name'
               required
             />
           </div>
@@ -74,7 +94,7 @@ const Register = () => {
               name='email'
               value={email}
               onChange={onChange}
-              placeholder='Enter your email...'
+              placeholder='Enter your email'
               required
             />
           </div>
@@ -86,7 +106,7 @@ const Register = () => {
               name='password'
               value={password}
               onChange={onChange}
-              placeholder='Enter your password...'
+              placeholder='Enter password'
               required
             />
           </div>
@@ -98,7 +118,7 @@ const Register = () => {
               name='password2'
               value={password2}
               onChange={onChange}
-              placeholder='Confirm password...'
+              placeholder='Confirm password'
               required
             />
           </div>
