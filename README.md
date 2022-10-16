@@ -13,4 +13,4 @@ A very simple full-stack Help Desk web application where you can register/login,
 
 # Technology
 
-Mongo Atlas + Express + React + Node + Mongoose + Redux toolkit + JWT for authentication.
+Mongo Atlas + Express + React + Node + Mongoose + Redux Toolkit + JWT for authentication.
